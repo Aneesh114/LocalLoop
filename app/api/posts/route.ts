@@ -21,15 +21,15 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { title, latitude, longitude } = await request.json();
+    const { title, description, latitude, longitude } = await request.json();
 
     if (!title || !latitude || !longitude) {
       return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
     }
 
     const { rows } = await pool.query(
-      "INSERT INTO posts (title, latitude, longitude) VALUES ($1, $2, $3) RETURNING *",
-      [title, latitude, longitude]
+      "INSERT INTO posts (title,description, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING *",
+      [title,description, latitude, longitude]
     );
 
     return NextResponse.json(rows[0], { status: 201 });
