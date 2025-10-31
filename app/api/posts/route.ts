@@ -1,6 +1,9 @@
+//app\api\posts\route.ts
 import { NextResponse } from "next/server";
 import { Pool } from "pg";
+import jwt from "jsonwebtoken";
 
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_key";
 const pool = new Pool({
   user: "postgres",
   host: "localhost",
@@ -20,7 +23,20 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+
+    const token = request.headers.get("cookie")?.split("token=")[1]?.split(";")[0];
+  if (!token) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
+    jwt.verify(token, JWT_SECRET);
+  } catch {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  }
+
+  // continue with your insert logic...
+   try {
     const { title, description, latitude, longitude } = await request.json();
 
     if (!title || !latitude || !longitude) {
@@ -38,3 +54,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to add post" }, { status: 500 });
   }
 }
+ 
+
